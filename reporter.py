@@ -17,12 +17,10 @@ Data = List[Row]
 
 class Reporter:
     """ Class to facilitate using the iTunes Reporter API
-
     When instantiating the class, you may provide either your user_id and
     password or the AccessKey for your account. If you provide the user_id and
     password, a new AccessKey will be retrieved (invalidating any previous ones)
     and stored when you try and access any data from the iTunes Reporter API.
-
     Other public methods/properties:
         access_token - AccessToken for this account
         account - if there are multiple accounts attached to the iTunes Reporter
@@ -45,7 +43,6 @@ class Reporter:
                  password: str = '',
                  user_id: str = '') -> None:
         """ Instantiate Reporter object
-
         Arguments:
             account - account ID (only necessary in case of multiple accounts
                 attached to iTunes Connect account
@@ -133,11 +130,9 @@ class Reporter:
                               report_subtype: str = '',
                               report_version: str = '') -> Data:
         """Downloads sales report, puts the TSV file into a Python list
-
         Information on the parameters can be found in the iTunes Reporter
         documentation:
         https://help.apple.com/itc/appsreporterguide/#/itcbd9ed14ac
-
         :param vendor:
         :param report_type:
         :param date_type:
@@ -162,11 +157,9 @@ class Reporter:
                                   fiscal_year: str,
                                   fiscal_period: str) -> Data:
         """Downloads sales report, puts the TSV file into a Python list
-
         Information on the parameters can be found in the iTunes Reporter
         documentation:
         https://help.apple.com/itc/appsreporterguide/#/itc21263284f
-
         :param vendor:
         :param region_code:
         :param report_type:
@@ -229,20 +222,29 @@ class Reporter:
         if not extra_params:
             extra_params = {}
 
-        if self.account:
-            command = f'[p=Reporter.properties, a={self.account} {cmd_type.capitalize()}.{command}]'
-        else:
-            command = f'[p=Reporter.properties, {cmd_type.capitalize()}.{command}]'
+        # command does not differ anymore, no matter if the apple id has multiple accoutns or not. a= is an invalid parameter by now.
+        command = f'[p=Reporter.properties, {cmd_type.capitalize()}.{command}]'
 
         endpoint = ('https://reportingitc-reporter.apple.com'
                     f'/reportservice/{cmd_type}/v1')
 
-        data = {
-            'version': self.version,
-            'mode': self.mode,
-            **credentials,
-            'queryInput': command,
-        }
+        # account needs to be passed as data, not as parameter
+        if self.account:
+
+            data = {
+                'version': self.version,
+                'mode': self.mode,
+                **credentials,
+                'queryInput': command,
+                'account': self.account
+            }
+        else:
+            data = {
+                'version': self.version,
+                'mode': self.mode,
+                **credentials,
+                'queryInput': command
+            }
 
         data = self._format_data(data)
         data.update(extra_params)
