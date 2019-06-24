@@ -243,7 +243,7 @@ class Reporter:
                 'mode': self.mode,
                 **credentials,
                 'queryInput': command,
-                'account': self.account
+                'a': self.account
             }
         else:
             data = {
