@@ -229,20 +229,29 @@ class Reporter:
         if not extra_params:
             extra_params = {}
 
-        if self.account:
-            command = f'[p=Reporter.properties, a={self.account} {cmd_type.capitalize()}.{command}]'
-        else:
-            command = f'[p=Reporter.properties, {cmd_type.capitalize()}.{command}]'
+        # command does not differ anymore, no matter if the apple id has multiple accoutns or not. a= is an invalid parameter by now.
+        command = f'[p=Reporter.properties, {cmd_type.capitalize()}.{command}]'
 
         endpoint = ('https://reportingitc-reporter.apple.com'
                     f'/reportservice/{cmd_type}/v1')
 
-        data = {
-            'version': self.version,
-            'mode': self.mode,
-            **credentials,
-            'queryInput': command,
-        }
+        # account needs to be passed as data, not as parameter
+        if self.account:
+
+            data = {
+                'version': self.version,
+                'mode': self.mode,
+                **credentials,
+                'queryInput': command,
+                'account': self.account
+            }
+        else:
+            data = {
+                'version': self.version,
+                'mode': self.mode,
+                **credentials,
+                'queryInput': command
+            }
 
         data = self._format_data(data)
         data.update(extra_params)
